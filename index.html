@@ -20,7 +20,7 @@
                 extend: {
                     colors: {
                         brand: {
-                            // Mapeando 'red' para a Cor Principal (Roxo Açaí) conforme solicitado para manter compatibilidade de classes
+                            // Mapeando 'red' para a Cor Principal (Roxo Açaí)
                             red: '#4C1D95', 
                             // Mapeando 'yellow' para a Cor Secundária (Amarelo Tropical)
                             yellow: '#FBBF24',
@@ -38,6 +38,12 @@
     </script>
 
     <style>
+        /* CSS Crítico para evitar tela preta por padrão */
+        body {
+            background-color: #F9FAFB !important; /* Força fundo claro */
+            color: #1F2937;
+        }
+
         /* Esconder scrollbar mas manter funcionalidade */
         .hide-scroll::-webkit-scrollbar {
             display: none;
@@ -66,14 +72,15 @@
 <body class="bg-gray-50 text-brand-dark font-sans antialiased pb-24 selection:bg-brand-red selection:text-white">
 
     <!-- HERO SECTION (Fachada + Navbar) -->
-    <header class="relative h-[380px] w-full bg-brand-dark overflow-hidden rounded-b-[2.5rem] shadow-xl z-10">
+    <!-- Alterado bg-brand-dark para bg-brand-red para evitar bloco preto se a imagem falhar -->
+    <header class="relative h-[380px] w-full bg-brand-red overflow-hidden rounded-b-[2.5rem] shadow-xl z-10">
         <!-- Imagem de Fundo -->
         <img src="fachada-acai.png" alt="Açaí Prime Fachada" 
              class="absolute inset-0 w-full h-full object-cover opacity-80"
              onerror="handleImageError(this, 'hero')">
         
-        <!-- Gradiente Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-brand-red/20 to-brand-dark/90"></div>
+        <!-- Gradiente Overlay (Ajustado para roxo) -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-brand-red/20 to-brand-red/90"></div>
 
         <!-- Conteúdo Hero -->
         <div class="relative z-20 h-full flex flex-col justify-between p-6 pt-8">
@@ -274,7 +281,7 @@
             <h3 class="font-display font-bold text-xl text-gray-800 mb-4 text-center">Quem prova, ama! 💜</h3>
             <div class="grid grid-cols-2 gap-3">
                  <div class="relative rounded-xl overflow-hidden aspect-[4/5] bg-gray-200 shadow-md">
-                     <video src="video1.mp4" class="w-full h-full object-cover" controls muted poster="video1_thumb.png" onerror="handleImageError(this)"></video>
+                     <video src="video1.mp4" class="w-full h-full object-cover" controls muted poster="https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=400&q=60" onerror="handleImageError(this)"></video>
                      <div class="absolute top-2 right-2 bg-black/50 p-1 rounded-full"><svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
                  </div>
                  <div class="relative rounded-xl overflow-hidden aspect-[4/5] bg-gray-200 shadow-md">
@@ -469,18 +476,33 @@
             }, 2500);
         }
 
-        // IMAGE FALLBACK
+        // IMAGE FALLBACK ROBUSTO
         function handleImageError(img, type) {
-            // Se for a imagem de fachada, usa um gradiente CSS puro como fallback visual se falhar
+            // Se for Hero, carrega uma imagem linda do Unsplash de Açaí
             if (type === 'hero') {
-                img.style.display = 'none';
+                img.src = "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=800&q=80";
+                // Remove o handler para evitar loop se esta também falhar (embora improvável)
+                img.onerror = null; 
                 return;
             }
-            // Fallback elegante para produtos: Placehold.co com texto
-            // Tenta pegar o nome do produto do alt ou do título próximo
-            const parentText = img.closest('.snap-child')?.querySelector('h3')?.innerText || 'Produto';
-            const encodedText = encodeURIComponent(parentText);
-            img.src = `https://placehold.co/400x300/f3f4f6/a3a3a3?text=${encodedText}`;
+            
+            // Fallback inteligente para produtos baseados no nome
+            const parentText = img.closest('.snap-child')?.innerText?.toLowerCase() || '';
+            
+            if (parentText.includes('tradicional') || parentText.includes('power')) {
+                // Tigela de Açaí
+                img.src = "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&w=400&q=80";
+            } else if (parentText.includes('vitamina') || parentText.includes('detox')) {
+                // Smoothies/Sucos
+                img.src = "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=400&q=80";
+            } else if (parentText.includes('cliente')) {
+                 // Foto de cliente
+                img.src = "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=400&q=80";
+            } else {
+                // Genérico (Granola/Ninho)
+                img.src = "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=400&q=80"; 
+            }
+            img.onerror = null;
         }
 
         // CHECKOUT WHATSAPP
